@@ -22,12 +22,14 @@ public class App {
         // Pegar os dados do IMDB
         //Extrair os dados
         //Exibir e manipular os dados
-
-        String url = "https://imdb-api.com/en/API/Top250Movies/k_6fbtuuy2";
+        //https://imdb-api.com/en/API/Top250Movies/k_6fbtuuy2
+        String url = "https://alura-imdb-api.herokuapp.com/movies";
         URI endereco = URI.create(url);
 
         var client = HttpClient.newHttpClient();
         var request = HttpRequest.newBuilder(endereco).GET().build();
+
+        Jackson
 
         HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
         String body = (String) response.body();
@@ -38,9 +40,18 @@ public class App {
        System.out.println(listaDeFilmes.size());
 
         for (Map<String,String> filme: listaDeFilmes) {
-            System.out.print(filme.get("title"));
-            System.out.print(filme.get("image"));
-            System.out.print(filme.get("imdbRating"));
+            System.out.println("\u001b[30m \u001b[45m"+filme.get("title")+"\u001b[m");
+            System.out.println(filme.get("image"));
+            System.out.println(filme.get("imDbRating"));
+
+            int rating = Math.round(Float.parseFloat(filme.get("imDbRating")));
+
+            for(int i = 0; i < rating; i++){
+                System.out.print("⭐️");
+            }
+
+            System.out.println();
+
         }
 
 
