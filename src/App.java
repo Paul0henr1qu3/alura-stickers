@@ -1,60 +1,78 @@
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 public class App {
 
+    public static Properties getProp() throws IOException {
+        Properties props = new Properties();
+        FileInputStream file = new FileInputStream(
+                "urls.properties");
+        props.load(file);
+        return props;
+
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        /*DESAFIOS
-        * Acessar outro serviço do IMDB
-        * Acessar a API dos mais populares
-        * Melhorar a saída
-        * Colocar a senha em um properties
-        * Utilizar outra biblioteca como parser
-        * Dar uma nota sobre o filme
-        * */
+        Properties prop = getProp();
 
-        // Pegar os dados do IMDB
-        //Extrair os dados
-        //Exibir e manipular os dados
-        //https://imdb-api.com/en/API/Top250Movies/k_6fbtuuy2
-        String url = "https://alura-imdb-api.herokuapp.com/movies";
+        String url = prop.getProperty("url.imdb.alura");
         URI endereco = URI.create(url);
 
         var client = HttpClient.newHttpClient();
         var request = HttpRequest.newBuilder(endereco).GET().build();
 
-        Jackson
-
         HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
         String body = (String) response.body();
 
-       JsonParser parser = new JsonParser();
-       List<Map<String,String>> listaDeFilmes = parser.parse(body);
+        JsonParser parser = new JsonParser();
+        List<Map<String,String>> listaDeFilmes = parser.parse(body);
 
-       System.out.println(listaDeFilmes.size());
+        var stickerGenerator= new StickerGenerator();
 
-        for (Map<String,String> filme: listaDeFilmes) {
-            System.out.println("\u001b[30m \u001b[45m"+filme.get("title")+"\u001b[m");
-            System.out.println(filme.get("image"));
-            System.out.println(filme.get("imDbRating"));
+        for (Map<String,String> movie: listaDeFilmes) {
 
-            int rating = Math.round(Float.parseFloat(filme.get("imDbRating")));
+            String urlMovieImage = movie.get("image");
+            String urlMovieBigImage = urlMovieImage.substring(0,urlMovieImage.indexOf("@")+1) + ".jpg";
+            String title = movie.get("title");
+            String stickerName = title + ".png";
+
+            try{
+                InputStream inputStream = new URL(urlMovieBigImage).openStream();
+                stickerGenerator.create(inputStream,stickerName);
+            }catch(Exception e){
+                System.out.println(e);
+            }
+
+        }
+
+    }
+
+    public void moviesImageAndRating(List<Map<String,String>> movieList){
+
+        for (Map<String,String> movie: movieList) {
+
+            System.out.println("\u001b[30m \u001b[45m"+movie.get("title")+"\u001b[m");
+            System.out.println(movie.get("image"));
+            System.out.println(movie.get("imDbRating"));
+
+            int rating = Math.round(Float.parseFloat(movie.get("imDbRating")));
 
             for(int i = 0; i < rating; i++){
                 System.out.print("⭐️");
             }
 
             System.out.println();
-
         }
-
-
 
     }
 
