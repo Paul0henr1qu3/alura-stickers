@@ -9,6 +9,8 @@ import java.net.URL;
 
 public class StickerGenerator {
 
+    String nameImage;
+
     public void create(InputStream inputStream, String stickerName) throws IOException {
 
         BufferedImage imageOriginal = ImageIO.read(inputStream);
@@ -26,11 +28,19 @@ public class StickerGenerator {
         grafhics.setColor(Color.YELLOW);
         grafhics.setFont(font);
 
-        grafhics.drawString("TOPZERA", 100,newHeight - 100);
+        grafhics.drawString(getNameImage(), 100,newHeight - 100);
 
         ImageIO.write(newImage,"png",new File("stickers/" + stickerName));
 
 
+    }
+
+    public void setNameImage(String nameImage){
+        this.nameImage = nameImage;
+    }
+
+    public String getNameImage(){
+        return this.nameImage;
     }
 
 }

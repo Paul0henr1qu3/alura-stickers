@@ -12,42 +12,22 @@ import java.util.Properties;
 
 public class App {
 
-    public static Properties getProp() throws IOException {
-        Properties props = new Properties();
-        FileInputStream file = new FileInputStream(
-                "urls.properties");
-        props.load(file);
-        return props;
-
-    }
-
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        Properties prop = getProp();
+        var client = new ClientHttp();
+        String json = client.getData("url.nasa.alura");
 
-        String url = prop.getProperty("url.imdb.alura");
-        URI endereco = URI.create(url);
-
-        var client = HttpClient.newHttpClient();
-        var request = HttpRequest.newBuilder(endereco).GET().build();
-
-        HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        String body = (String) response.body();
-
-        JsonParser parser = new JsonParser();
-        List<Map<String,String>> listaDeFilmes = parser.parse(body);
-
+        ContentExtractor extractor = new ContentExtractorNasa();
         var stickerGenerator= new StickerGenerator();
+        List<Content> contents =  extractor.contentExtractor(json);
 
-        for (Map<String,String> movie: listaDeFilmes) {
+        for (Content content: contents) {
 
-            String urlMovieImage = movie.get("image");
-            String urlMovieBigImage = urlMovieImage.substring(0,urlMovieImage.indexOf("@")+1) + ".jpg";
-            String title = movie.get("title");
-            String stickerName = title + ".png";
+            String stickerName = content.getTitle() + ".png";
+            stickerGenerator.setNameImage(content.getTitle());
 
             try{
-                InputStream inputStream = new URL(urlMovieBigImage).openStream();
+                InputStream inputStream = new URL(content.getUrlImage()).openStream();
                 stickerGenerator.create(inputStream,stickerName);
             }catch(Exception e){
                 System.out.println(e);
